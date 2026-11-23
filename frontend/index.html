@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Security Hub</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 60px auto;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #38bdf8;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        #result {
+            margin-top: 20px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🛡️ Security Hub</h1>
+        <p>Dein persönlicher Sicherheitsassistent</p>
+
+        <div class="card">
+            <h2>🔗 URL Security Checker</h2>
+            <p>Überprüfe einen Link auf bekannte Bedrohungen.</p>
+
+            <form id="url-form">
+                <input
+                    id="url"
+                    type="url"
+                    placeholder="https://example.com"
+                    required
+                >
+
+                <button id="analyze-button" type="submit">
+                    Analysieren
+                </button>
+            </form>
+
+            <div id="result" role="status"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById("url-form");
+        const input = document.getElementById("url");
+        const button = document.getElementById("analyze-button");
+        const result = document.getElementById("result");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            result.textContent = "🔄 URL wird analysiert ...";
+            button.disabled = true;
+
+            try {
+                const response = await fetch("/api/analyze/url", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        url: input.value.trim()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "API-Fehler");
+                }
+
+                if (data.status === "threat_detected") {
+                    result.textContent =
+                        "⚠️ Bekannte Bedrohung gefunden!";
+                } else if (data.status === "no_known_threat") {
+                    result.textContent =
+                        "ℹ️ Keine bekannte Bedrohung gefunden. " +
+                        "Dies ist keine Sicherheitsgarantie.";
+                } else {
+                    throw new Error("Unbekanntes Analyseergebnis");
+                }
+
+            } catch (error) {
+                result.textContent =
+                    "❌ Analyse fehlgeschlagen: " + error.message;
+            } finally {
+                button.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

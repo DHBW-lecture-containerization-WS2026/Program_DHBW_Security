@@ -3,6 +3,7 @@ import os
 
 import httpx
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, HttpUrl
 
 app = FastAPI(title="Security Hub")
@@ -102,3 +103,8 @@ async def analyze_url(request: URLRequest):
             else "Keine bekannte Bedrohung gefunden."
         )
     }
+
+# Frontend-Route
+@app.get("/app", include_in_schema=False)
+def frontend():
+    return FileResponse("frontend/index.html")
