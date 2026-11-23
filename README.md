@@ -14,7 +14,7 @@ Security Hub ist eine Webanwendung, mit der Benutzer verschiedene Sicherheitspr�
 - **XposedOrNot:** Überprüfung von E-Mail-Datenlecks
 - **Have I Been Pwned:** Überprüfung kompromittierter Passwörter
 - **Google Safe Browsing:** Erkennung gefährlicher URLs
-- 
+
 ## Team-Mitglieder
 - Michael Kurz
 - Bartolmay Can
