@@ -28,8 +28,8 @@ Ziel ist die Entwicklung einer benutzerfreundlichen Plattform, die verschiedene 
 
 Das Projekt entsteht im Rahmen einer Hochschulprojektarbeit zum Thema Containerization.
 
-https://xposedornot.com/api_doc?utm_source=chatgpt.com
+https://xposedornot.com/api_doc
 
-https://haveibeenpwned.com/API/v3?utm_source=chatgpt.com#PwnedPasswords
+https://haveibeenpwned.com/API/v3?utm_source=#PwnedPasswords
 
-https://developers.google.com/safe-browsing?utm_source=chatgpt.com
+https://developers.google.com/safe-browsing
