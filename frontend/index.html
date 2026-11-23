@@ -7,42 +7,63 @@
     <title>Security Hub</title>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #0f172a;
-            color: white;
-            margin: 0;
-            padding: 40px 20px;
+        * {
+            box-sizing: border-box;
         }
 
-        .container {
-            max-width: 650px;
+        body {
+            margin: 0;
+            background: #0f172a;
+            color: #f8fafc;
+            font-family: Arial, sans-serif;
+        }
+
+        main {
+            max-width: 760px;
             margin: 60px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 35px;
         }
 
         .card {
             background: #1e293b;
-            padding: 30px;
-            border-radius: 15px;
+            padding: 28px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card p {
+            color: #cbd5e1;
+        }
+
+        input, button {
+            font: inherit;
+            border-radius: 8px;
+            padding: 13px;
         }
 
         input {
-            box-sizing: border-box;
             width: 100%;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 8px;
-            border: none;
-            font-size: 16px;
+            background: #334155;
+            color: white;
+            border: 1px solid #64748b;
+            margin: 10px 0;
         }
 
         button {
             width: 100%;
-            padding: 15px;
-            background: #38bdf8;
+            margin-top: 10px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            background: #38bdf8;
+            color: #082f49;
             font-weight: bold;
             cursor: pointer;
         }
@@ -52,87 +73,151 @@
             cursor: wait;
         }
 
-        #result {
+        .result {
             margin-top: 20px;
-            line-height: 1.6;
             overflow-wrap: anywhere;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>🛡️ Security Hub</h1>
-        <p>Dein persönlicher Sicherheitsassistent</p>
+<main>
+    <h1>🛡️ Security Hub</h1>
+    <p class="subtitle">Your personal security toolkit</p>
 
-        <div class="card">
-            <h2>🔗 URL Security Checker</h2>
-            <p>Überprüfe einen Link auf bekannte Bedrohungen.</p>
+    <!-- URL CHECKER -->
+    <section class="card">
+        <h2>🔗 URL Security Checker</h2>
+        <p>Prüfe eine URL auf bekannte Bedrohungen.</p>
 
-            <form id="url-form">
-                <input
-                    id="url"
-                    type="url"
-                    placeholder="https://example.com"
-                    required
-                >
+        <form id="url-form">
+            <input
+                id="url-input"
+                type="url"
+                placeholder="https://example.com"
+                required
+            >
 
-                <button id="analyze-button" type="submit">
-                    Analysieren
-                </button>
-            </form>
+            <button id="url-button" type="submit">
+                Analysieren
+            </button>
+        </form>
 
-            <div id="result" role="status"></div>
-        </div>
-    </div>
+        <div id="url-result" class="result" role="status"></div>
+    </section>
 
-    <script>
-        const form = document.getElementById("url-form");
-        const input = document.getElementById("url");
-        const button = document.getElementById("analyze-button");
-        const result = document.getElementById("result");
+    <!-- PASSWORD GENERATOR -->
+    <section class="card">
+        <h2>🔑 Password Generator</h2>
+        <p>Erstelle ein sicheres, zufälliges Passwort.</p>
 
-        form.addEventListener("submit", async (event) => {
-            event.preventDefault();
+        <form id="password-form">
+            <label for="password-length">Passwortlänge</label>
 
-            result.textContent = "🔄 URL wird analysiert ...";
-            button.disabled = true;
+            <input
+                id="password-length"
+                type="number"
+                min="12"
+                max="64"
+                value="20"
+                required
+            >
 
-            try {
-                const response = await fetch("/api/analyze/url", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        url: input.value.trim()
-                    })
-                });
+            <button id="password-button" type="submit">
+                Passwort generieren
+            </button>
+        </form>
 
-                const data = await response.json();
+        <div id="password-result" class="result" role="status"></div>
+    </section>
+</main>
 
-                if (!response.ok) {
-                    throw new Error(data.detail || "API-Fehler");
-                }
+<script>
+    // URL CHECKER
+    const urlForm = document.getElementById("url-form");
+    const urlResult = document.getElementById("url-result");
+    const urlButton = document.getElementById("url-button");
 
-                if (data.status === "threat_detected") {
-                    result.textContent =
-                        "⚠️ Bekannte Bedrohung gefunden!";
-                } else if (data.status === "no_known_threat") {
-                    result.textContent =
-                        "ℹ️ Keine bekannte Bedrohung gefunden. " +
-                        "Dies ist keine Sicherheitsgarantie.";
-                } else {
-                    throw new Error("Unbekanntes Analyseergebnis");
-                }
+    urlForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        urlButton.disabled = true;
+        urlResult.textContent = "Analysiere URL ...";
 
-            } catch (error) {
-                result.textContent =
-                    "❌ Analyse fehlgeschlagen: " + error.message;
-            } finally {
-                button.disabled = false;
+        try {
+            const url = document.getElementById("url-input").value;
+
+            const response = await fetch("/api/analyze/url", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ url })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error("URL-Prüfung fehlgeschlagen.");
             }
-        });
-    </script>
+
+            if (data.status === "threat_detected") {
+                urlResult.textContent =
+                    "⚠️ Bekannte Bedrohung gefunden!";
+            } else if (data.status === "no_known_threat") {
+                urlResult.textContent =
+                    "ℹ️ Keine bekannte Bedrohung gefunden. " +
+                    "Das ist keine Sicherheitsgarantie.";
+            } else {
+                throw new Error("Unbekanntes Analyseergebnis.");
+            }
+
+        } catch (error) {
+            urlResult.textContent = "❌ " + error.message;
+        } finally {
+            urlButton.disabled = false;
+        }
+    });
+
+
+    // PASSWORD GENERATOR
+    const passwordForm = document.getElementById("password-form");
+    const passwordResult = document.getElementById("password-result");
+    const passwordButton = document.getElementById("password-button");
+
+    passwordForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        passwordButton.disabled = true;
+        passwordResult.textContent = "Generiere Passwort ...";
+
+        try {
+            const length = Number(
+                document.getElementById("password-length").value
+            );
+
+            const response = await fetch("/api/generate/password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ length })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error("Passwortgenerierung fehlgeschlagen.");
+            }
+
+            passwordResult.textContent =
+                "Generiertes Passwort:\n" + data.password;
+
+        } catch (error) {
+            passwordResult.textContent = "❌ " + error.message;
+        } finally {
+            passwordButton.disabled = false;
+        }
+    });
+</script>
 </body>
 </html>
