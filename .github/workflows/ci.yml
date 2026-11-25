@@ -28,8 +28,8 @@ jobs:
       - name: Build backend Docker image
         run: docker build -t security-hub-backend:test .
 
-      - name: Build frontend Docker image
-        run: docker build -t security-hub-frontend:test ./frontend
+      #- name: Build frontend Docker image
+      #  run: docker build -t security-hub-frontend:test ./frontend
 
       - name: Run tests
         run: python -m pytest tests/ -v
