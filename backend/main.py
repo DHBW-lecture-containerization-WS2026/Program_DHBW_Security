@@ -5,6 +5,9 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, HttpUrl
+import secrets
+import string
+from pydantic import Field
 
 app = FastAPI(title="Security Hub")
 
@@ -103,6 +106,39 @@ async def analyze_url(request: URLRequest):
             else "Keine bekannte Bedrohung gefunden."
         )
     }
+
+
+class PasswordGenerateRequest(BaseModel):
+    length: int = Field(default=20, ge=12, le=64)
+
+
+@app.post("/api/generate/password")
+def generate_password(request: PasswordGenerateRequest):
+
+    groups = [
+        string.ascii_lowercase,
+        string.ascii_uppercase,
+        string.digits,
+        "!@#$%&*?-_"
+    ]
+
+    alphabet = "".join(groups)
+
+    characters = [
+        secrets.choice(group)
+        for group in groups
+    ]
+
+    for _ in range(request.length - len(characters)):
+        characters.append(secrets.choice(alphabet))
+
+    secrets.SystemRandom().shuffle(characters)
+
+    return {
+        "password": "".join(characters),
+        "length": request.length
+    }
+
 
 # Frontend-Route
 @app.get("/app", include_in_schema=False)
