@@ -1,0 +1,35 @@
+name: Security Hub CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+
+      - name: Run tests
+        run: python -m pytest tests/ -v
+
+      - name: Build backend Docker image
+        run: docker build -t security-hub-backend:test .
+
+      - name: Build frontend Docker image
+        run: docker build -t security-hub-frontend:test ./frontend
+
+      - name: Run tests
+        run: python -m pytest tests/ -v
