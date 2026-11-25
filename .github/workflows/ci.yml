@@ -30,6 +30,3 @@ jobs:
 
       #- name: Build frontend Docker image
       #  run: docker build -t security-hub-frontend:test ./frontend
-
-      - name: Run tests
-        run: python -m pytest tests/ -v

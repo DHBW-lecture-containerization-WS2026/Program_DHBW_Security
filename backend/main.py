@@ -8,6 +8,8 @@ from pydantic import BaseModel, HttpUrl
 import secrets
 import string
 from pydantic import Field
+from urllib.parse import quote
+from pydantic import EmailStr
 
 app = FastAPI(title="Security Hub")
 
@@ -144,3 +146,93 @@ def generate_password(request: PasswordGenerateRequest):
 @app.get("/app", include_in_schema=False)
 def frontend():
     return FileResponse("frontend/index.html")
+
+
+
+
+class EmailRequest(BaseModel):
+    email: EmailStr
+    consent: bool = False
+
+
+@app.post("/api/analyze/email")
+async def analyze_email(request: EmailRequest):
+
+    if not request.consent:
+        raise HTTPException(
+            status_code=400,
+            detail="Zustimmung zur externen Prüfung erforderlich."
+        )
+
+    email = quote(str(request.email), safe="")
+
+    api_url = (
+        "https://api.xposedornot.com"
+        f"/v1/check-email/{email}"
+    )
+
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(api_url)
+
+        # XposedOrNot: kein Eintrag gefunden
+        if response.status_code == 404:
+            return {
+                "status": "no_known_breach",
+                "count": 0,
+                "breaches": []
+            }
+
+        if response.status_code == 429:
+            raise HTTPException(
+                status_code=429,
+                detail="API-Limit erreicht. Bitte später erneut versuchen."
+            )
+
+        response.raise_for_status()
+        data = response.json()
+
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=502,
+            detail="E-Mail-Prüfung derzeit nicht verfügbar."
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=502,
+            detail="Ungültige API-Antwort."
+        )
+
+    if data.get("Error") == "Not found":
+        return {
+            "status": "no_known_breach",
+            "count": 0,
+            "breaches": []
+        }
+
+    raw_breaches = data.get("breaches")
+
+    if not isinstance(raw_breaches, list):
+        raise HTTPException(
+            status_code=502,
+            detail="Unerwartetes API-Antwortformat."
+        )
+
+    # API liefert eine verschachtelte Liste
+    breaches = [
+        name
+        for group in raw_breaches
+        for name in (group if isinstance(group, list) else [group])
+        if isinstance(name, str)
+    ]
+
+    return {
+        "status": (
+            "breach_detected"
+            if breaches
+            else "no_known_breach"
+        ),
+        "count": len(breaches),
+        "breaches": breaches
+    }

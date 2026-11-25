@@ -78,6 +78,21 @@
             overflow-wrap: anywhere;
             white-space: pre-wrap;
         }
+        .consent-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 15px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #cbd5e1;
+    }
+
+    #email-consent {
+        width: auto;
+        margin: 3px 0 0;
+        accent-color: #38bdf8;
+    }
     </style>
 </head>
 
@@ -130,6 +145,55 @@
         </form>
 
         <div id="password-result" class="result" role="status"></div>
+    </section>
+
+     <section class="card">
+        <h2>📧 E-Mail Leak Checker</h2>
+
+        <p>
+            Prüfe, ob deine E-Mail-Adresse in
+            bekannten Datenlecks vorkommt.
+        </p>
+
+        <form id="email-form">
+
+            <label for="email-input">
+                E-Mail-Adresse
+            </label>
+
+            <input
+                id="email-input"
+                type="email"
+                placeholder="name@example.com"
+                required
+            >
+
+            <label class="consent-row">
+                <input
+                    id="email-consent"
+                    type="checkbox"
+                    required
+                >
+
+                <span>
+                    Ich stimme zu, dass meine E-Mail-Adresse
+                    zur Überprüfung an XposedOrNot
+                    übermittelt wird.
+                </span>
+            </label>
+
+            <button id="email-button" type="submit">
+                E-Mail analysieren
+            </button>
+
+        </form>
+
+        <div
+            id="email-result"
+            class="result"
+            role="status"
+            aria-live="polite"
+        ></div>
     </section>
 </main>
 
@@ -218,6 +282,78 @@
             passwordButton.disabled = false;
         }
     });
+
+
+
+    
+// ----------------------------------
+// EMAIL LEAK CHECKER
+// ----------------------------------
+
+    const emailForm = document.getElementById("email-form");
+    const emailResult = document.getElementById("email-result");
+    const emailButton = document.getElementById("email-button");
+
+
+    emailForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const email = document.getElementById("email-input").value.trim();
+        const consent = document.getElementById("email-consent").checked;
+
+        emailButton.disabled = true;
+        emailResult.textContent = "🔄 E-Mail wird analysiert ...";
+
+        try {
+            const response = await fetch("/api/analyze/email", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    consent: consent
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    typeof data.detail === "string"
+                        ? data.detail
+                        : "E-Mail-Prüfung fehlgeschlagen."
+                );
+            }
+
+            if (data.status === "breach_detected") {
+                emailResult.textContent =
+                    "⚠️ Achtung! " + data.count +
+                    " bekannte Datenlecks gefunden.\n\n" +
+                    "Betroffene Dienste:\n" +
+                    data.breaches.join(", ") +
+                    "\n\nEmpfehlung: Ändere betroffene Passwörter " +
+                    "und aktiviere Zwei-Faktor-Authentifizierung.";
+
+            } else if (data.status === "no_known_breach") {
+                emailResult.textContent =
+                    "✅ Keine bekannten Datenlecks gefunden.\n" +
+                    "Das bedeutet nicht, dass deine " +
+                    "E-Mail-Adresse garantiert sicher ist.";
+
+            } else {
+                throw new Error("Unbekanntes Analyseergebnis.");
+            }
+
+        } catch (error) {
+            emailResult.textContent =
+                "❌ " + error.message;
+
+        } finally {
+            emailButton.disabled = false;
+        }
+    });
+
 </script>
 </body>
 </html>
