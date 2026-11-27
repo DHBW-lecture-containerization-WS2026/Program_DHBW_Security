@@ -235,3 +235,8 @@ def test_email_breach_detected(respx_mock):
     assert response.json()["count"] == 2
     assert "ExampleBreach" in response.json()["breaches"]
 
+
+
+
+
+
