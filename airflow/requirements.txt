@@ -1,0 +1,3 @@
+# Zusätzliche Pakete für den Airflow-Container (Pipeline-Code)
+httpx
+psycopg[binary]

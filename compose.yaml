@@ -1,7 +1,69 @@
+# Lokaler Start der gesamten Lösung:
+#   docker compose up --build
+#
+# Web-App:  http://localhost:8000/app
+# Airflow:  http://localhost:8080
+#
+# Optionale Einstellungen (API-Keys, Passwörter) in .env, siehe .env.example
+
+x-database-url: &database-url
+  SECURITY_HUB_DATABASE_URL: postgresql://${POSTGRES_USER:-securityhub}:${POSTGRES_PASSWORD:-securityhub}@postgres:5432/securityhub
+
 services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-securityhub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-securityhub}
+      POSTGRES_DB: securityhub
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d securityhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  airflow:
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
+    image: security-hub-airflow:local
+    # "standalone" startet alle Airflow-Komponenten in einem Container.
+    # Für die Entwicklung ideal, für Produktion (Kubernetes) später aufteilen.
+    command: standalone
+    environment:
+      <<: *database-url
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-securityhub}:${POSTGRES_PASSWORD:-securityhub}@postgres:5432/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "False"
+      # Nur lokal: Airflow-Oberfläche ohne Login
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "True"
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET:-local-dev-secret-change-me}
+      SECURITY_HUB_RETENTION_DAYS: ${SECURITY_HUB_RETENTION_DAYS:-30}
+      NVD_API_KEY: ${NVD_API_KEY:-}
+    ports:
+      - "127.0.0.1:${AIRFLOW_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   backend:
     build: .
+    image: security-hub-backend:local
+    environment:
+      <<: *database-url
+      GOOGLE_SAFE_BROWSING_API_KEY: ${GOOGLE_SAFE_BROWSING_API_KEY:-}
+    volumes:
+      # Lokale Entwicklung: HTML-Änderungen sind ohne Neubau sofort sichtbar
+      - ./frontend:/app/frontend:ro
     ports:
       - "127.0.0.1:8000:8000"
-    env_file:
-      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

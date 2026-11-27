@@ -12,7 +12,10 @@ from pydantic import Field
 from urllib.parse import quote
 from pydantic import EmailStr
 
+from backend.feeds import router as feeds_router
+
 app = FastAPI(title="Security Hub")
+app.include_router(feeds_router)
 
 
 # Datenmodell für die URL-Eingabe

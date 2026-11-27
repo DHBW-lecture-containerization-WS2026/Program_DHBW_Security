@@ -390,6 +390,219 @@
             background: #e6f2f1;
         }
 
+        /* ---------- Lagebild (Dashboard) ---------- */
+
+        .feeds-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 24px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .feed {
+            padding: 24px 0 28px;
+            border-top: 1px solid var(--line);
+        }
+
+        .feed-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .feed-head h3 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        .feed-head p {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+            max-width: 56ch;
+        }
+
+        .feed-total {
+            text-align: right;
+        }
+
+        .feed-total strong {
+            display: block;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 2.2rem;
+            line-height: 1;
+        }
+
+        .feed-total span {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .feed-facts {
+            margin: 10px 0 0;
+            color: var(--ink);
+            font-size: 0.95rem;
+        }
+
+        .chart {
+            position: relative;
+            margin-top: 18px;
+        }
+
+        .chart svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            overflow: visible;
+        }
+
+        .chart .grid {
+            stroke: var(--line);
+            stroke-width: 1;
+        }
+
+        .chart .axis-label {
+            fill: var(--muted);
+            font-size: 11px;
+            font-family: var(--font-body);
+        }
+
+        .chart .bar {
+            fill: #257de0;
+        }
+
+        .chart .hit {
+            fill: transparent;
+            cursor: default;
+        }
+
+        .chart .hit:hover + .bar,
+        .chart .bar.active {
+            fill: #1757ac;
+        }
+
+        .tooltip {
+            position: absolute;
+            top: -8px;
+            transform: translate(-50%, -100%);
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: var(--ink);
+            color: #ffffff;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .tooltip[hidden] {
+            display: none;
+        }
+
+        .feed details {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .feed details table {
+            margin-top: 8px;
+            border-collapse: collapse;
+        }
+
+        .feed details td,
+        .feed details th {
+            padding: 2px 16px 2px 0;
+            text-align: left;
+            font-weight: normal;
+        }
+
+        .feed details td:last-child {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .latest {
+            margin: 18px 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .latest li {
+            display: grid;
+            grid-template-columns: 110px 1fr auto;
+            gap: 14px;
+            align-items: baseline;
+            padding: 9px 0;
+            border-top: 1px dashed var(--line);
+        }
+
+        .latest a {
+            color: var(--ink);
+            font-weight: 600;
+            text-decoration: none;
+            overflow-wrap: anywhere;
+        }
+
+        .latest a:hover {
+            text-decoration: underline;
+        }
+
+        .latest .event-desc {
+            margin-top: 2px;
+            color: var(--muted);
+            font-size: 0.85rem;
+            display: -webkit-box;
+            line-clamp: 2;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .latest time {
+            color: var(--muted);
+            font-size: 0.85rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 9px;
+            border-radius: 999px;
+            background: var(--badge-bg);
+            color: var(--badge);
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .badge.critical { --badge: var(--danger);  --badge-bg: var(--danger-bg); }
+        .badge.high     { --badge: var(--warning); --badge-bg: var(--warning-bg); }
+        .badge.medium   { --badge: var(--neutral); --badge-bg: var(--neutral-bg); }
+        .badge.low      { --badge: var(--ok);      --badge-bg: var(--ok-bg); }
+        .badge.unknown  { --badge: var(--muted);   --badge-bg: var(--neutral-bg); }
+
+        .run-failed {
+            color: var(--danger);
+        }
+
         /* ---------- Fußzeile ---------- */
 
         footer {
@@ -457,6 +670,15 @@
             .verdict-meta {
                 grid-column: 1;
             }
+
+            .latest li {
+                grid-template-columns: 1fr auto;
+            }
+
+            .latest li > div {
+                grid-column: 1 / -1;
+                grid-row: 2;
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -512,6 +734,14 @@
                     <path d="M3 7 L12 13 L21 7"/>
                 </svg>
                 E-Mail prüfen
+            </button>
+            <button class="tab" role="tab" id="tab-feeds" aria-controls="panel-feeds"
+                    aria-selected="false" tabindex="-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <path d="M4 20 V12 M10 20 V5 M16 20 V9 M22 20 H2"/>
+                </svg>
+                Lagebild
             </button>
         </div>
 
@@ -608,13 +838,35 @@
             <div id="email-result" class="result" role="status" aria-live="polite"></div>
         </section>
 
+        <!-- LAGEBILD -->
+        <section class="panel" role="tabpanel" id="panel-feeds"
+                 aria-labelledby="tab-feeds" hidden>
+            <h2>Was ist in den letzten 30 Tagen passiert?</h2>
+            <p class="lead">
+                Neue Datenlecks und Sicherheitslücken aus öffentlichen Quellen.
+                Die Daten werden täglich automatisch abgerufen.
+            </p>
+
+            <div class="feeds-toolbar">
+                <span id="feeds-status" role="status" aria-live="polite"></span>
+                <button id="feeds-refresh" class="secondary" type="button">
+                    Neu laden
+                </button>
+            </div>
+
+            <div id="feeds-content"></div>
+        </section>
+
     </main>
 
     <footer>
         Daten von
-        <a href="https://developers.google.com/safe-browsing" rel="noopener">Google Safe Browsing</a>
+        <a href="https://developers.google.com/safe-browsing" rel="noopener">Google Safe Browsing</a>,
+        <a href="https://xposedornot.com" rel="noopener">XposedOrNot</a>,
+        <a href="https://haveibeenpwned.com" rel="noopener">Have I Been Pwned</a>,
+        <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" rel="noopener">CISA</a>
         und
-        <a href="https://xposedornot.com" rel="noopener">XposedOrNot</a>.
+        <a href="https://nvd.nist.gov" rel="noopener">NVD</a>.
         Kein Ergebnis ist eine Sicherheitsgarantie.
     </footer>
 
@@ -637,6 +889,11 @@
             ).hidden = !selected;
         }
         tab.focus();
+
+        // Lagebild erst laden, wenn der Tab das erste Mal geöffnet wird
+        if (tab.id === "tab-feeds" && !feedsLoaded) {
+            loadFeeds();
+        }
     }
 
     for (const tab of tabs) {
@@ -1005,6 +1262,348 @@
             emailButton.disabled = false;
         }
     });
+
+
+    // ----------------------------------
+    // LAGEBILD
+    // ----------------------------------
+
+    let feedsLoaded = false;
+    const feedsContent = document.getElementById("feeds-content");
+    const feedsStatus = document.getElementById("feeds-status");
+    const feedsRefresh = document.getElementById("feeds-refresh");
+
+    const SEVERITY_LABELS = {
+        critical: "kritisch",
+        high: "hoch",
+        medium: "mittel",
+        low: "niedrig",
+        unknown: "ohne Bewertung"
+    };
+
+    const numberFormat = new Intl.NumberFormat("de-DE");
+    const compactFormat = new Intl.NumberFormat("de-DE", {
+        notation: "compact",
+        maximumFractionDigits: 1
+    });
+    const dayFormat = new Intl.DateTimeFormat("de-DE", {
+        day: "2-digit", month: "2-digit"
+    });
+    const dateTimeFormat = new Intl.DateTimeFormat("de-DE", {
+        dateStyle: "medium", timeStyle: "short"
+    });
+
+    // Hilfsfunktion: Element mit Klasse und Text erzeugen
+    function el(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined && text !== null) node.textContent = text;
+        return node;
+    }
+
+    function svgEl(tag, attrs) {
+        const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+        for (const [key, value] of Object.entries(attrs)) {
+            node.setAttribute(key, value);
+        }
+        return node;
+    }
+
+    // "Schöne" Obergrenze für die y-Achse (1, 2, 5, 10, 20, 50 ...)
+    function niceMax(value) {
+        if (value <= 1) return 1;
+        const magnitude = 10 ** Math.floor(Math.log10(value));
+        for (const step of [1, 2, 2.5, 5, 10]) {
+            if (step * magnitude >= value) return step * magnitude;
+        }
+        return 10 * magnitude;
+    }
+
+    function parseDay(isoDate) {
+        const [year, month, day] = isoDate.split("-").map(Number);
+        return new Date(year, month - 1, day);
+    }
+
+    // Balkendiagramm: neue Einträge pro Tag, mit Tooltip beim Überfahren
+    function renderChart(daily, label) {
+        const wrapper = el("div", "chart");
+        const width = 640;
+        const height = 150;
+        const top = 10;
+        const bottom = 22;
+        const left = 34;
+        const plotHeight = height - top - bottom;
+        const plotWidth = width - left;
+        const max = niceMax(Math.max(...daily.map((d) => d.count)));
+        const slot = plotWidth / daily.length;
+        const barWidth = Math.max(slot - 2, 1);   // 2px Abstand zwischen Balken
+        const radius = Math.min(4, barWidth / 2);
+
+        const svg = svgEl("svg", {
+            viewBox: `0 0 ${width} ${height}`,
+            role: "img",
+            "aria-label": `${label}: neue Einträge pro Tag, maximal ${max}`
+        });
+
+        // Gitterlinien bei 0 und Maximum
+        for (const value of [0, max]) {
+            const y = top + plotHeight - (value / max) * plotHeight;
+            svg.appendChild(svgEl("line", {
+                class: "grid", x1: left, x2: width, y1: y, y2: y
+            }));
+            const text = svgEl("text", {
+                class: "axis-label", x: left - 6, y: y + 4, "text-anchor": "end"
+            });
+            text.textContent = compactFormat.format(value);
+            svg.appendChild(text);
+        }
+
+        const tooltip = el("div", "tooltip");
+        tooltip.hidden = true;
+
+        daily.forEach((day, index) => {
+            const x = left + index * slot + 1;
+            const barHeight = (day.count / max) * plotHeight;
+            const baseline = top + plotHeight;
+
+            // Unsichtbare Trefferfläche über die volle Höhe
+            const hit = svgEl("rect", {
+                class: "hit", x: x - 1, y: top, width: slot, height: plotHeight
+            });
+
+            const bar = svgEl("path", {
+                class: "bar",
+                d: barHeight > 0
+                    ? roundedTopBar(x, baseline, barWidth, barHeight, radius)
+                    : ""
+            });
+
+            const show = () => {
+                bar.classList.add("active");
+                tooltip.textContent =
+                    dayFormat.format(parseDay(day.date)) + ": " +
+                    numberFormat.format(day.count) +
+                    (day.count === 1 ? " Eintrag" : " Einträge");
+                tooltip.style.left = ((x + barWidth / 2) / width * 100) + "%";
+                tooltip.hidden = false;
+            };
+            const hide = () => {
+                bar.classList.remove("active");
+                tooltip.hidden = true;
+            };
+
+            hit.addEventListener("mouseenter", show);
+            hit.addEventListener("mouseleave", hide);
+            svg.appendChild(hit);
+            svg.appendChild(bar);
+        });
+
+        // Erstes und letztes Datum als x-Achse
+        const first = daily[0];
+        const last = daily[daily.length - 1];
+        for (const [day, x, anchor] of [[first, left, "start"], [last, width, "end"]]) {
+            const text = svgEl("text", {
+                class: "axis-label", x, y: height - 4, "text-anchor": anchor
+            });
+            text.textContent = dayFormat.format(parseDay(day.date));
+            svg.appendChild(text);
+        }
+
+        wrapper.appendChild(svg);
+        wrapper.appendChild(tooltip);
+        return wrapper;
+    }
+
+    function roundedTopBar(x, baseline, w, h, r) {
+        const radius = Math.min(r, h);
+        const topY = baseline - h;
+        return [
+            `M${x},${baseline}`,
+            `V${topY + radius}`,
+            `Q${x},${topY} ${x + radius},${topY}`,
+            `H${x + w - radius}`,
+            `Q${x + w},${topY} ${x + w},${topY + radius}`,
+            `V${baseline}`,
+            "Z"
+        ].join(" ");
+    }
+
+    // Tabellenansicht der Tageswerte (Barrierefreiheit)
+    function renderDailyTable(daily) {
+        const details = el("details");
+        details.appendChild(el("summary", null, "Tageswerte als Tabelle"));
+
+        const table = el("table");
+        const head = el("tr");
+        head.appendChild(el("th", null, "Tag"));
+        head.appendChild(el("th", null, "Einträge"));
+        table.appendChild(head);
+
+        for (const day of daily.slice().reverse()) {
+            const row = el("tr");
+            row.appendChild(el("td", null, dayFormat.format(parseDay(day.date))));
+            row.appendChild(el("td", null, numberFormat.format(day.count)));
+            table.appendChild(row);
+        }
+
+        details.appendChild(table);
+        return details;
+    }
+
+    function renderLatest(events) {
+        const list = el("ul", "latest");
+
+        for (const event of events) {
+            const item = el("li");
+            item.appendChild(el("time", null, dayFormat.format(new Date(event.date))));
+
+            const main = el("div");
+            const link = el("a", null, event.title);
+            link.href = event.url || "#";
+            link.target = "_blank";
+            link.rel = "noopener";
+            main.appendChild(link);
+            if (event.description) {
+                main.appendChild(el("span", "event-desc", event.description));
+            }
+            item.appendChild(main);
+
+            item.appendChild(el(
+                "span",
+                "badge " + event.severity,
+                SEVERITY_LABELS[event.severity] || event.severity
+            ));
+
+            list.appendChild(item);
+        }
+
+        return list;
+    }
+
+    function renderFeed(source, days) {
+        const section = el("section", "feed");
+
+        const head = el("div", "feed-head");
+        const intro = el("div");
+        intro.appendChild(el("h3", null, source.label));
+        intro.appendChild(el("p", null, source.description));
+        head.appendChild(intro);
+
+        const total = el("div", "feed-total");
+        total.appendChild(el("strong", null, numberFormat.format(source.total)));
+        total.appendChild(el("span", null, `in ${days} Tagen`));
+        head.appendChild(total);
+        section.appendChild(head);
+
+        // Kurze Fakten in ganzen Sätzen
+        const facts = [];
+        const severe = source.by_severity.critical + source.by_severity.high;
+        if (source.by_severity.critical > 0) {
+            const critical = source.by_severity.critical;
+            facts.push(`${numberFormat.format(critical)} davon ${critical === 1 ? "ist" : "sind"} kritisch.`);
+        } else if (severe > 0) {
+            facts.push(`${numberFormat.format(severe)} davon mit hohem Risiko.`);
+        }
+        if (source.affected_accounts) {
+            facts.push(`Insgesamt ${compactFormat.format(source.affected_accounts)} betroffene Konten.`);
+        }
+        if (source.last_run && source.last_run.status === "failed") {
+            const failed = el("p", "feed-facts run-failed",
+                "Der letzte Abruf ist fehlgeschlagen. Die Daten sind eventuell nicht aktuell.");
+            section.appendChild(failed);
+        }
+        if (facts.length > 0) {
+            section.appendChild(el("p", "feed-facts", facts.join(" ")));
+        }
+
+        if (source.daily.length > 0) {
+            section.appendChild(renderChart(source.daily, source.label));
+            section.appendChild(renderDailyTable(source.daily));
+        }
+
+        if (source.latest.length > 0) {
+            section.appendChild(renderLatest(source.latest));
+        }
+
+        return section;
+    }
+
+    function lastUpdate(sources) {
+        const times = sources
+            .map((s) => s.last_run && s.last_run.finished_at)
+            .filter(Boolean)
+            .map((t) => new Date(t));
+        if (times.length === 0) return null;
+        return new Date(Math.max(...times));
+    }
+
+    async function loadFeeds() {
+        feedsLoaded = true;
+        feedsRefresh.disabled = true;
+        feedsStatus.textContent = "Lagebild wird geladen …";
+
+        try {
+            const response = await fetch("/api/feeds/summary?days=30&latest=5");
+            const data = await response.json().catch(() => null);
+
+            if (!response.ok) {
+                throw new Error(
+                    data && typeof data.detail === "string"
+                        ? data.detail
+                        : "Das Lagebild konnte nicht geladen werden."
+                );
+            }
+
+            feedsContent.replaceChildren();
+
+            if (data.sources.length === 0) {
+                feedsStatus.textContent = "";
+                renderVerdict(feedsContent, "error", "Noch keine Daten",
+                    data.message || "Es wurden noch keine Daten gesammelt.", [], "");
+                return;
+            }
+
+            for (const source of data.sources) {
+                feedsContent.appendChild(renderFeed(source, data.days));
+            }
+
+            const updated = lastUpdate(data.sources);
+            feedsStatus.textContent = updated
+                ? "Zuletzt aktualisiert: " + dateTimeFormat.format(updated)
+                : "";
+
+        } catch (error) {
+            feedsStatus.textContent = "";
+            renderVerdict(feedsContent, "error", "Lagebild nicht verfügbar",
+                error.message, [], "");
+        } finally {
+            feedsRefresh.disabled = false;
+        }
+    }
+
+    feedsRefresh.addEventListener("click", loadFeeds);
+
+
+    // ----------------------------------
+    // DIREKTLINKS AUF TABS (z. B. /app#lagebild)
+    // ----------------------------------
+
+    const TAB_HASHES = {
+        "#link": "tab-url",
+        "#passwort": "tab-password",
+        "#email": "tab-email",
+        "#lagebild": "tab-feeds"
+    };
+
+    function openTabFromHash() {
+        const tabId = TAB_HASHES[location.hash];
+        if (tabId) {
+            selectTab(document.getElementById(tabId));
+        }
+    }
+
+    window.addEventListener("hashchange", openTabFromHash);
+    openTabFromHash();
 </script>
 </body>
 </html>

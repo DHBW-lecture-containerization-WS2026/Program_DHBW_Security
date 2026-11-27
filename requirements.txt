@@ -5,3 +5,4 @@ httpx
 respx
 pydantic
 email-validator
+psycopg[binary]
