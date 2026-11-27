@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -6,249 +5,718 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Security Hub</title>
 
+    <!--
+        Bewusst nur Systemschriften: Externe Webfonts (z. B. Google Fonts)
+        würden die IP-Adresse der Nutzer an Dritte übertragen.
+    -->
     <style>
+        :root {
+            --paper: #f1f4f1;
+            --surface: #ffffff;
+            --ink: #14213d;
+            --muted: #5b6578;
+            --line: #d3dad4;
+            --action: #0b4747;
+            --action-dark: #129760;
+
+            --danger: #b42318;
+            --danger-bg: #fdecea;
+            --warning: #9e6014;
+            --warning-bg: #fdf3e1;
+            --ok: #308855;
+            --ok-bg: #e7f4ec;
+            --neutral: #465675;
+            --neutral-bg: #eceff2;
+
+            --font-display: "Bahnschrift", "DIN Alternate", "Roboto Condensed",
+                "Arial Narrow", sans-serif;
+            --font-body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue",
+                Arial, sans-serif;
+            --font-mono: "Cascadia Mono", "Consolas", "SF Mono", monospace;
+        }
+
         * {
             box-sizing: border-box;
         }
 
         body {
             margin: 0;
-            background: #0f172a;
-            color: #f8fafc;
-            font-family: Arial, sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            line-height: 1.55;
         }
 
-        main {
-            max-width: 760px;
-            margin: 60px auto;
-            padding: 20px;
+        .page {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 56px 24px 40px;
         }
 
-        h1 {
-            margin-bottom: 8px;
+        /* ---------- Kopfbereich ---------- */
+
+        .masthead {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 40px;
         }
 
-        .subtitle {
-            color: #94a3b8;
-            margin-bottom: 35px;
+        .shield {
+            flex: none;
+            width: 56px;
+            height: 64px;
         }
 
-        .card {
-            background: #1e293b;
-            padding: 28px;
-            border-radius: 16px;
-            margin-bottom: 24px;
+        .masthead h1 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 2.6rem;
+            line-height: 1;
+            letter-spacing: -0.01em;
         }
 
-        .card p {
-            color: #cbd5e1;
+        .masthead p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 1.05rem;
+            max-width: 52ch;
         }
 
-        input, button {
-            font: inherit;
-            border-radius: 8px;
-            padding: 13px;
+        /* ---------- Prüfbereich mit Tabs ---------- */
+
+        .bench {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
         }
 
-        input {
+        .tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 16px 12px;
+            background: #f7f9f7;
+            border-right: 1px solid var(--line);
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             width: 100%;
-            background: #334155;
-            color: white;
-            border: 1px solid #64748b;
-            margin: 10px 0;
-        }
-
-        button {
-            width: 100%;
-            margin-top: 10px;
+            padding: 12px 14px;
             border: none;
-            background: #38bdf8;
-            color: #082f49;
-            font-weight: bold;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--muted);
+            font: inherit;
+            font-weight: 600;
+            text-align: left;
             cursor: pointer;
         }
 
-        button:disabled {
-            opacity: 0.6;
-            cursor: wait;
+        .tab svg {
+            flex: none;
+            width: 20px;
+            height: 20px;
         }
+
+        .tab:hover {
+            color: var(--ink);
+            background: #dee4df;
+        }
+
+        .tab[aria-selected="true"] {
+            color: var(--ink);
+            background: var(--surface);
+            box-shadow: inset 3px 0 0 var(--action), 0 0 0 1px var(--line);
+        }
+
+        .panel {
+            padding: 36px 40px 40px;
+            min-height: 440px;
+        }
+
+        .panel[hidden] {
+            display: none;
+        }
+
+        .panel h2 {
+            margin: 0 0 6px;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 1.75rem;
+            line-height: 1.15;
+        }
+
+        .panel .lead {
+            margin: 0 0 28px;
+            color: var(--muted);
+            max-width: 58ch;
+        }
+
+        /* ---------- Formulare ---------- */
+
+        label.field-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            max-width: 620px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"] {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 14px;
+            border: 1.5px solid var(--line);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--ink);
+            font: inherit;
+        }
+
+        input[type="number"] {
+            flex: none;
+            width: 110px;
+        }
+
+        input:hover {
+            border-color: #b4bdb6;
+        }
+
+        input:focus-visible,
+        button:focus-visible {
+            outline: 3px solid color-mix(in srgb, var(--action) 45%, transparent);
+            outline-offset: 2px;
+            border-color: var(--action);
+        }
+
+        .primary {
+            flex: none;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 8px;
+            background: var(--action);
+            color: #ffffff;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .primary:hover {
+            background: var(--action-dark);
+        }
+
+        .primary:disabled {
+            opacity: 0.6;
+            cursor: progress;
+        }
+
+        .hint {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        .consent-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            max-width: 620px;
+            margin-top: 16px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .consent-row input {
+            flex: none;
+            width: 18px;
+            height: 18px;
+            margin: 2px 0 0;
+            accent-color: var(--action);
+        }
+
+        .length-control {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            max-width: 620px;
+        }
+
+        .length-control input[type="range"] {
+            flex: 1;
+            accent-color: var(--action);
+        }
+
+        /* ---------- Urteil (Prüfstempel) ---------- */
 
         .result {
-            margin-top: 20px;
-            overflow-wrap: anywhere;
-            white-space: pre-wrap;
+            margin-top: 32px;
+            max-width: 620px;
         }
-        .consent-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        margin-top: 15px;
-        font-size: 14px;
-        line-height: 1.5;
-        color: #cbd5e1;
-    }
 
-    .result-box {
-        padding: 16px;
-        border-radius: 10px;
-        border-left: 5px solid;
-        white-space: normal;
-    }
+        .result:empty {
+            display: none;
+        }
 
-    .result-box.danger  { background: #450a0a; border-color: #ef4444; }
-    .result-box.warning { background: #422006; border-color: #f59e0b; }
-    .result-box.ok      { background: #052e16; border-color: #22c55e; }
-    .result-box.error   { background: #3f3f46; border-color: #a1a1aa; }
+        .loading {
+            color: var(--muted);
+        }
 
-    .result-box strong {
-        display: block;
-        margin-bottom: 6px;
-    }
+        .verdict {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 4px 20px;
+            padding: 22px 24px;
+            border-radius: 12px;
+            background: var(--tone-bg);
+            color: var(--ink);
+        }
 
-    .result-box ul {
-        margin: 8px 0 0;
-        padding-left: 20px;
-    }
+        .verdict.danger  { --tone: var(--danger);  --tone-bg: var(--danger-bg); }
+        .verdict.warning { --tone: var(--warning); --tone-bg: var(--warning-bg); }
+        .verdict.ok      { --tone: var(--ok);      --tone-bg: var(--ok-bg); }
+        .verdict.error   { --tone: var(--neutral); --tone-bg: var(--neutral-bg); }
 
-    .result-box .checked-url {
-        color: #94a3b8;
-        font-size: 13px;
-        margin-top: 10px;
-    }
+        .stamp {
+            grid-row: span 3;
+            display: grid;
+            place-items: center;
+            width: 76px;
+            height: 76px;
+            border: 3px solid var(--tone);
+            border-radius: 50%;
+            color: var(--tone);
+            transform: rotate(-8deg);
+            animation: stamp 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+        }
 
-    #email-consent {
-        width: auto;
-        margin: 3px 0 0;
-        accent-color: #38bdf8;
-    }
+        .stamp svg {
+            width: 34px;
+            height: 34px;
+        }
+
+        @keyframes stamp {
+            from {
+                opacity: 0;
+                transform: rotate(-8deg) scale(1.5);
+            }
+            to {
+                opacity: 1;
+                transform: rotate(-8deg) scale(1);
+            }
+        }
+
+        .verdict-title {
+            margin: 4px 0 0;
+            color: var(--tone);
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.4rem;
+            line-height: 1.2;
+        }
+
+        .verdict-text {
+            margin: 0;
+        }
+
+        .verdict ul {
+            margin: 8px 0 0;
+            padding-left: 18px;
+        }
+
+        .verdict li + li {
+            margin-top: 4px;
+        }
+
+        .verdict-meta {
+            grid-column: 2;
+            margin: 12px 0 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+            overflow-wrap: anywhere;
+        }
+
+        /* ---------- Passwort-Ausgabe ---------- */
+
+        .password-output {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 20px;
+            border: 1.5px dashed var(--action);
+            border-radius: 12px;
+            background: #f4faf9;
+        }
+
+        .password-output code {
+            flex: 1;
+            min-width: 0;
+            font-family: var(--font-mono);
+            font-size: 1.25rem;
+            letter-spacing: 0.04em;
+            overflow-wrap: anywhere;
+        }
+
+        .secondary {
+            flex: none;
+            padding: 9px 16px;
+            border: 1.5px solid var(--action);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--action);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .secondary:hover {
+            background: #e6f2f1;
+        }
+
+        /* ---------- Fußzeile ---------- */
+
+        footer {
+            margin-top: 28px;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: inherit;
+        }
+
+        /* ---------- Mobil ---------- */
+
+        @media (max-width: 760px) {
+            .page {
+                padding-top: 32px;
+            }
+
+            .masthead h1 {
+                font-size: 2rem;
+            }
+
+            .bench {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .tabs {
+                min-width: 0;
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 10px;
+                border-right: none;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .tab {
+                width: auto;
+                white-space: nowrap;
+            }
+
+            .tab[aria-selected="true"] {
+                box-shadow: inset 0 -3px 0 var(--action), 0 0 0 1px var(--line);
+            }
+
+            .panel {
+                padding: 28px 20px 32px;
+                min-height: 0;
+            }
+
+            .input-row {
+                flex-direction: column;
+            }
+
+            .verdict {
+                grid-template-columns: 1fr;
+            }
+
+            .stamp {
+                grid-row: auto;
+                width: 60px;
+                height: 60px;
+            }
+
+            .verdict-meta {
+                grid-column: 1;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .stamp {
+                animation: none;
+            }
+        }
     </style>
 </head>
 
 <body>
-<main>
-    <h1>🛡️ Security Hub</h1>
-    <p class="subtitle">Your personal security toolkit</p>
+<div class="page">
 
-    <!-- URL CHECKER -->
-    <section class="card">
-        <h2>🔗 URL Security Checker</h2>
-        <p>Prüfe eine URL auf bekannte Bedrohungen.</p>
+    <header class="masthead">
+        <svg class="shield" viewBox="0 0 56 64" aria-hidden="true">
+            <path d="M28 2 L52 11 V30 C52 46 41 57 28 62 C15 57 4 46 4 30 V11 Z"
+                  fill="#14213d"/>
+            <path d="M17 32 L25 40 L40 23" fill="none" stroke="#f1f4f1"
+                  stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+            <h1>Security Hub</h1>
+            <p>Prüfe Links, Passwörter und E-Mail-Adressen, bevor du ihnen vertraust.</p>
+        </div>
+    </header>
 
-        <form id="url-form">
-            <input
-                id="url-input"
-                type="text"
-                inputmode="url"
-                autocomplete="off"
-                spellcheck="false"
-                placeholder="example.com oder https://example.com"
-                required
-            >
+    <main class="bench">
 
-            <button id="url-button" type="submit">
-                Analysieren
+        <div class="tabs" role="tablist" aria-label="Werkzeuge" aria-orientation="vertical">
+            <button class="tab" role="tab" id="tab-url" aria-controls="panel-url"
+                    aria-selected="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/>
+                    <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>
+                </svg>
+                Link prüfen
             </button>
-        </form>
-
-        <div id="url-result" class="result" role="status"></div>
-    </section>
-
-    <!-- PASSWORD GENERATOR -->
-    <section class="card">
-        <h2>🔑 Password Generator</h2>
-        <p>Erstelle ein sicheres, zufälliges Passwort.</p>
-
-        <form id="password-form">
-            <label for="password-length">Passwortlänge</label>
-
-            <input
-                id="password-length"
-                type="number"
-                min="12"
-                max="64"
-                value="20"
-                required
-            >
-
-            <button id="password-button" type="submit">
-                Passwort generieren
+            <button class="tab" role="tab" id="tab-password" aria-controls="panel-password"
+                    aria-selected="false" tabindex="-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <circle cx="8" cy="15" r="4"/>
+                    <path d="M11 12 L20 3 M16 7 L19 10 M18 5 L21 8"/>
+                </svg>
+                Passwort erstellen
             </button>
-        </form>
-
-        <div id="password-result" class="result" role="status"></div>
-    </section>
-
-     <section class="card">
-        <h2>📧 E-Mail Leak Checker</h2>
-
-        <p>
-            Prüfe, ob deine E-Mail-Adresse in
-            bekannten Datenlecks vorkommt.
-        </p>
-
-        <form id="email-form">
-
-            <label for="email-input">
-                E-Mail-Adresse
-            </label>
-
-            <input
-                id="email-input"
-                type="email"
-                placeholder="name@example.com"
-                required
-            >
-
-            <label class="consent-row">
-                <input
-                    id="email-consent"
-                    type="checkbox"
-                    required
-                >
-
-                <span>
-                    Ich stimme zu, dass meine E-Mail-Adresse
-                    zur Überprüfung an XposedOrNot
-                    übermittelt wird.
-                </span>
-            </label>
-
-            <button id="email-button" type="submit">
-                E-Mail analysieren
+            <button class="tab" role="tab" id="tab-email" aria-controls="panel-email"
+                    aria-selected="false" tabindex="-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="14" rx="2"/>
+                    <path d="M3 7 L12 13 L21 7"/>
+                </svg>
+                E-Mail prüfen
             </button>
+        </div>
 
-        </form>
+        <!-- LINK PRÜFEN -->
+        <section class="panel" role="tabpanel" id="panel-url" aria-labelledby="tab-url">
+            <h2>Ist dieser Link sicher?</h2>
+            <p class="lead">
+                Wir gleichen den Link mit der Google-Safe-Browsing-Liste bekannter
+                Phishing- und Malware-Seiten ab und prüfen ihn auf typische Tricks.
+            </p>
 
-        <div
-            id="email-result"
-            class="result"
-            role="status"
-            aria-live="polite"
-        ></div>
-    </section>
-</main>
+            <form id="url-form">
+                <label class="field-label" for="url-input">Link</label>
+                <div class="input-row">
+                    <input
+                        id="url-input"
+                        type="text"
+                        inputmode="url"
+                        autocomplete="off"
+                        spellcheck="false"
+                        placeholder="example.com oder https://example.com"
+                        required
+                    >
+                    <button id="url-button" class="primary" type="submit">
+                        Link prüfen
+                    </button>
+                </div>
+            </form>
+
+            <div id="url-result" class="result" role="status" aria-live="polite"></div>
+        </section>
+
+        <!-- PASSWORT ERSTELLEN -->
+        <section class="panel" role="tabpanel" id="panel-password"
+                 aria-labelledby="tab-password" hidden>
+            <h2>Ein neues, starkes Passwort</h2>
+            <p class="lead">
+                Zufällig erzeugt aus Klein- und Großbuchstaben, Ziffern und
+                Sonderzeichen. Das Passwort wird nirgends gespeichert.
+            </p>
+
+            <form id="password-form">
+                <label class="field-label" for="password-length">Länge</label>
+                <div class="length-control">
+                    <input id="password-range" type="range" min="12" max="64"
+                           value="20" aria-label="Länge als Schieberegler">
+                    <input id="password-length" type="number" min="12" max="64"
+                           value="20" required>
+                </div>
+                <p class="hint">Zwischen 12 und 64 Zeichen. Mehr ist sicherer.</p>
+
+                <button id="password-button" class="primary" type="submit"
+                        style="margin-top: 20px;">
+                    Passwort erstellen
+                </button>
+            </form>
+
+            <div id="password-result" class="result" role="status" aria-live="polite"></div>
+        </section>
+
+        <!-- E-MAIL PRÜFEN -->
+        <section class="panel" role="tabpanel" id="panel-email"
+                 aria-labelledby="tab-email" hidden>
+            <h2>Steckt deine E-Mail in einem Datenleck?</h2>
+            <p class="lead">
+                Wir fragen bei XposedOrNot nach, ob deine Adresse in bekannten
+                Datenlecks auftaucht.
+            </p>
+
+            <form id="email-form">
+                <label class="field-label" for="email-input">E-Mail-Adresse</label>
+                <div class="input-row">
+                    <input
+                        id="email-input"
+                        type="email"
+                        autocomplete="email"
+                        placeholder="name@example.com"
+                        required
+                    >
+                    <button id="email-button" class="primary" type="submit">
+                        E-Mail prüfen
+                    </button>
+                </div>
+
+                <label class="consent-row">
+                    <input id="email-consent" type="checkbox" required>
+                    <span>
+                        Ich stimme zu, dass meine E-Mail-Adresse zur Prüfung
+                        an XposedOrNot übermittelt wird.
+                    </span>
+                </label>
+            </form>
+
+            <div id="email-result" class="result" role="status" aria-live="polite"></div>
+        </section>
+
+    </main>
+
+    <footer>
+        Daten von
+        <a href="https://developers.google.com/safe-browsing" rel="noopener">Google Safe Browsing</a>
+        und
+        <a href="https://xposedornot.com" rel="noopener">XposedOrNot</a>.
+        Kein Ergebnis ist eine Sicherheitsgarantie.
+    </footer>
+
+</div>
 
 <script>
-    // URL CHECKER
-    const urlForm = document.getElementById("url-form");
-    const urlResult = document.getElementById("url-result");
-    const urlButton = document.getElementById("url-button");
+    // ----------------------------------
+    // TABS
+    // ----------------------------------
 
-    // Ergebnis sicher (ohne innerHTML) als farbige Box darstellen
-    function renderUrlResult(kind, title, text, items, checkedUrl) {
-        urlResult.replaceChildren();
+    const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+
+    function selectTab(tab) {
+        for (const other of tabs) {
+            const selected = other === tab;
+            other.setAttribute("aria-selected", String(selected));
+            other.tabIndex = selected ? 0 : -1;
+            document.getElementById(
+                other.getAttribute("aria-controls")
+            ).hidden = !selected;
+        }
+        tab.focus();
+    }
+
+    for (const tab of tabs) {
+        tab.addEventListener("click", () => selectTab(tab));
+
+        // Pfeiltasten wechseln zwischen den Tabs
+        tab.addEventListener("keydown", (event) => {
+            const index = tabs.indexOf(tab);
+            let next = null;
+
+            if (["ArrowDown", "ArrowRight"].includes(event.key)) {
+                next = tabs[(index + 1) % tabs.length];
+            } else if (["ArrowUp", "ArrowLeft"].includes(event.key)) {
+                next = tabs[(index - 1 + tabs.length) % tabs.length];
+            } else if (event.key === "Home") {
+                next = tabs[0];
+            } else if (event.key === "End") {
+                next = tabs[tabs.length - 1];
+            }
+
+            if (next) {
+                event.preventDefault();
+                selectTab(next);
+            }
+        });
+    }
+
+
+    // ----------------------------------
+    // URTEIL ANZEIGEN (ohne innerHTML)
+    // ----------------------------------
+
+    const STAMP_ICONS = {
+        danger: "M12 7 V13 M12 17 V17.01",
+        warning: "M12 7 V13 M12 17 V17.01",
+        ok: "M6 12.5 L10.5 17 L18 8",
+        error: "M8 8 L16 16 M16 8 L8 16"
+    };
+
+    function stampIcon(kind) {
+        const ns = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(ns, "svg");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("aria-hidden", "true");
+
+        const path = document.createElementNS(ns, "path");
+        path.setAttribute("d", STAMP_ICONS[kind]);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", "currentColor");
+        path.setAttribute("stroke-width", "3");
+        path.setAttribute("stroke-linecap", "round");
+        path.setAttribute("stroke-linejoin", "round");
+
+        svg.appendChild(path);
+        return svg;
+    }
+
+    function renderVerdict(target, kind, title, text, items, meta) {
+        target.replaceChildren();
 
         const box = document.createElement("div");
-        box.className = "result-box " + kind;
+        box.className = "verdict " + kind;
 
-        const heading = document.createElement("strong");
+        const stamp = document.createElement("div");
+        stamp.className = "stamp";
+        stamp.appendChild(stampIcon(kind));
+        box.appendChild(stamp);
+
+        const heading = document.createElement("p");
+        heading.className = "verdict-title";
         heading.textContent = title;
         box.appendChild(heading);
 
+        const body = document.createElement("div");
+
         if (text) {
-            const paragraph = document.createElement("div");
+            const paragraph = document.createElement("p");
+            paragraph.className = "verdict-text";
             paragraph.textContent = text;
-            box.appendChild(paragraph);
+            body.appendChild(paragraph);
         }
 
         if (items && items.length > 0) {
@@ -258,18 +726,37 @@
                 li.textContent = item;
                 list.appendChild(li);
             }
-            box.appendChild(list);
+            body.appendChild(list);
         }
 
-        if (checkedUrl) {
-            const urlLine = document.createElement("div");
-            urlLine.className = "checked-url";
-            urlLine.textContent = "Geprüft: " + checkedUrl;
-            box.appendChild(urlLine);
+        box.appendChild(body);
+
+        if (meta) {
+            const metaLine = document.createElement("p");
+            metaLine.className = "verdict-meta";
+            metaLine.textContent = meta;
+            box.appendChild(metaLine);
         }
 
-        urlResult.appendChild(box);
+        target.appendChild(box);
     }
+
+    function showLoading(target, text) {
+        target.replaceChildren();
+        const line = document.createElement("p");
+        line.className = "loading";
+        line.textContent = text;
+        target.appendChild(line);
+    }
+
+
+    // ----------------------------------
+    // LINK PRÜFEN
+    // ----------------------------------
+
+    const urlForm = document.getElementById("url-form");
+    const urlResult = document.getElementById("url-result");
+    const urlButton = document.getElementById("url-button");
 
     // "example.com" -> "https://example.com"
     function normalizeUrl(value) {
@@ -280,20 +767,20 @@
         return "https://" + trimmed;
     }
 
-    function errorMessage(data, status) {
+    function urlErrorMessage(data, status) {
         if (status === 422) {
-            return "Das ist keine gültige URL (nur http/https).";
+            return "Das ist kein gültiger Link. Erlaubt sind http- und https-Adressen.";
         }
         if (data && typeof data.detail === "string") {
             return data.detail;
         }
-        return "URL-Prüfung fehlgeschlagen.";
+        return "Der Link konnte nicht geprüft werden. Versuche es später erneut.";
     }
 
     urlForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         urlButton.disabled = true;
-        urlResult.textContent = "🔄 Analysiere URL ...";
+        showLoading(urlResult, "Link wird geprüft …");
 
         try {
             const url = normalizeUrl(
@@ -311,69 +798,115 @@
             const data = await response.json().catch(() => null);
 
             if (!response.ok) {
-                throw new Error(errorMessage(data, response.status));
+                throw new Error(urlErrorMessage(data, response.status));
             }
 
             const warnings = data.warnings || [];
+            const checked = "Geprüft: " + data.url;
 
             if (data.status === "threat_detected") {
                 const labels = (data.threat_types || [])
                     .map((threat) => threat.label);
 
-                renderUrlResult(
+                renderVerdict(
+                    urlResult,
                     "danger",
-                    "⚠️ Bekannte Bedrohung gefunden!",
-                    "Google Safe Browsing stuft diese URL als gefährlich " +
-                    "ein. Öffne sie nicht.",
+                    "Gefährlich",
+                    "Google Safe Browsing führt diesen Link als gefährlich. " +
+                    "Öffne ihn nicht.",
                     labels.concat(warnings),
-                    data.url
+                    checked
                 );
             } else if (data.status === "no_known_threat") {
                 if (warnings.length > 0) {
-                    renderUrlResult(
+                    renderVerdict(
+                        urlResult,
                         "warning",
-                        "🟡 Keine bekannte Bedrohung, aber Auffälligkeiten",
-                        "Google kennt keine Bedrohung. Folgende Punkte " +
-                        "solltest du trotzdem prüfen:",
+                        "Auffällig",
+                        "Google kennt keine Bedrohung, aber dieser Link " +
+                        "hat Merkmale, die oft bei Betrug vorkommen:",
                         warnings,
-                        data.url
+                        checked
                     );
                 } else {
-                    renderUrlResult(
+                    renderVerdict(
+                        urlResult,
                         "ok",
-                        "✅ Keine bekannte Bedrohung gefunden",
-                        "Das ist keine Sicherheitsgarantie. Prüfe " +
-                        "trotzdem, ob du der Seite vertraust.",
+                        "Keine bekannte Bedrohung",
+                        "Der Link steht auf keiner Warnliste und zeigt keine " +
+                        "typischen Tricks. Vertraue ihm trotzdem nur, wenn du " +
+                        "den Absender kennst.",
                         [],
-                        data.url
+                        checked
                     );
                 }
             } else {
-                throw new Error("Unbekanntes Analyseergebnis.");
+                throw new Error("Der Server hat ein unbekanntes Ergebnis geliefert.");
             }
 
         } catch (error) {
-            renderUrlResult("error", "❌ " + error.message, "", [], "");
+            renderVerdict(urlResult, "error", "Nicht geprüft", error.message, [], "");
         } finally {
             urlButton.disabled = false;
         }
     });
 
 
-    // PASSWORD GENERATOR
+    // ----------------------------------
+    // PASSWORT ERSTELLEN
+    // ----------------------------------
+
     const passwordForm = document.getElementById("password-form");
     const passwordResult = document.getElementById("password-result");
     const passwordButton = document.getElementById("password-button");
+    const passwordLength = document.getElementById("password-length");
+    const passwordRange = document.getElementById("password-range");
+
+    // Schieberegler und Zahlenfeld synchron halten
+    passwordRange.addEventListener("input", () => {
+        passwordLength.value = passwordRange.value;
+    });
+    passwordLength.addEventListener("input", () => {
+        passwordRange.value = passwordLength.value;
+    });
+
+    function renderPassword(password) {
+        passwordResult.replaceChildren();
+
+        const box = document.createElement("div");
+        box.className = "password-output";
+
+        const code = document.createElement("code");
+        code.textContent = password;
+        box.appendChild(code);
+
+        const copyButton = document.createElement("button");
+        copyButton.type = "button";
+        copyButton.className = "secondary";
+        copyButton.textContent = "Kopieren";
+        copyButton.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(password);
+                copyButton.textContent = "Kopiert";
+            } catch {
+                copyButton.textContent = "Kopieren nicht möglich";
+            }
+            setTimeout(() => {
+                copyButton.textContent = "Kopieren";
+            }, 2000);
+        });
+        box.appendChild(copyButton);
+
+        passwordResult.appendChild(box);
+    }
 
     passwordForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         passwordButton.disabled = true;
-        passwordResult.textContent = "Generiere Passwort ...";
+        showLoading(passwordResult, "Passwort wird erstellt …");
 
         try {
-            const length = Number(
-                document.getElementById("password-length").value
-            );
+            const length = Number(passwordLength.value);
 
             const response = await fetch("/api/generate/password", {
                 method: "POST",
@@ -383,33 +916,33 @@
                 body: JSON.stringify({ length })
             });
 
-            const data = await response.json();
+            const data = await response.json().catch(() => null);
 
             if (!response.ok) {
-                throw new Error("Passwortgenerierung fehlgeschlagen.");
+                throw new Error(
+                    response.status === 422
+                        ? "Wähle eine Länge zwischen 12 und 64 Zeichen."
+                        : "Das Passwort konnte nicht erstellt werden."
+                );
             }
 
-            passwordResult.textContent =
-                "Generiertes Passwort:\n" + data.password;
+            renderPassword(data.password);
 
         } catch (error) {
-            passwordResult.textContent = "❌ " + error.message;
+            renderVerdict(passwordResult, "error", "Nicht erstellt", error.message, [], "");
         } finally {
             passwordButton.disabled = false;
         }
     });
 
 
-
-    
-// ----------------------------------
-// EMAIL LEAK CHECKER
-// ----------------------------------
+    // ----------------------------------
+    // E-MAIL PRÜFEN
+    // ----------------------------------
 
     const emailForm = document.getElementById("email-form");
     const emailResult = document.getElementById("email-result");
     const emailButton = document.getElementById("email-button");
-
 
     emailForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -418,7 +951,7 @@
         const consent = document.getElementById("email-consent").checked;
 
         emailButton.disabled = true;
-        emailResult.textContent = "🔄 E-Mail wird analysiert ...";
+        showLoading(emailResult, "E-Mail-Adresse wird geprüft …");
 
         try {
             const response = await fetch("/api/analyze/email", {
@@ -426,50 +959,52 @@
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    email: email,
-                    consent: consent
-                })
+                body: JSON.stringify({ email, consent })
             });
 
-            const data = await response.json();
+            const data = await response.json().catch(() => null);
 
             if (!response.ok) {
                 throw new Error(
-                    typeof data.detail === "string"
+                    data && typeof data.detail === "string"
                         ? data.detail
-                        : "E-Mail-Prüfung fehlgeschlagen."
+                        : "Die E-Mail-Adresse konnte nicht geprüft werden."
                 );
             }
 
             if (data.status === "breach_detected") {
-                emailResult.textContent =
-                    "⚠️ Achtung! " + data.count +
-                    " bekannte Datenlecks gefunden.\n\n" +
-                    "Betroffene Dienste:\n" +
-                    data.breaches.join(", ") +
-                    "\n\nEmpfehlung: Ändere betroffene Passwörter " +
-                    "und aktiviere Zwei-Faktor-Authentifizierung.";
-
+                renderVerdict(
+                    emailResult,
+                    "danger",
+                    data.count === 1
+                        ? "In 1 Datenleck gefunden"
+                        : "In " + data.count + " Datenlecks gefunden",
+                    "Ändere das Passwort bei diesen Diensten und überall, " +
+                    "wo du es ebenfalls nutzt. Aktiviere wenn möglich " +
+                    "die Zwei-Faktor-Anmeldung.",
+                    data.breaches,
+                    "Geprüft: " + email
+                );
             } else if (data.status === "no_known_breach") {
-                emailResult.textContent =
-                    "✅ Keine bekannten Datenlecks gefunden.\n" +
-                    "Das bedeutet nicht, dass deine " +
-                    "E-Mail-Adresse garantiert sicher ist.";
-
+                renderVerdict(
+                    emailResult,
+                    "ok",
+                    "Kein bekanntes Datenleck",
+                    "Deine Adresse taucht in keinem bekannten Leck auf. " +
+                    "Neue Lecks werden oft erst später bekannt.",
+                    [],
+                    "Geprüft: " + email
+                );
             } else {
-                throw new Error("Unbekanntes Analyseergebnis.");
+                throw new Error("Der Server hat ein unbekanntes Ergebnis geliefert.");
             }
 
         } catch (error) {
-            emailResult.textContent =
-                "❌ " + error.message;
-
+            renderVerdict(emailResult, "error", "Nicht geprüft", error.message, [], "");
         } finally {
             emailButton.disabled = false;
         }
     });
-
 </script>
 </body>
 </html>
