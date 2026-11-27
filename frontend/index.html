@@ -88,6 +88,34 @@
         color: #cbd5e1;
     }
 
+    .result-box {
+        padding: 16px;
+        border-radius: 10px;
+        border-left: 5px solid;
+        white-space: normal;
+    }
+
+    .result-box.danger  { background: #450a0a; border-color: #ef4444; }
+    .result-box.warning { background: #422006; border-color: #f59e0b; }
+    .result-box.ok      { background: #052e16; border-color: #22c55e; }
+    .result-box.error   { background: #3f3f46; border-color: #a1a1aa; }
+
+    .result-box strong {
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .result-box ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+    }
+
+    .result-box .checked-url {
+        color: #94a3b8;
+        font-size: 13px;
+        margin-top: 10px;
+    }
+
     #email-consent {
         width: auto;
         margin: 3px 0 0;
@@ -109,8 +137,11 @@
         <form id="url-form">
             <input
                 id="url-input"
-                type="url"
-                placeholder="https://example.com"
+                type="text"
+                inputmode="url"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="example.com oder https://example.com"
                 required
             >
 
@@ -203,13 +234,71 @@
     const urlResult = document.getElementById("url-result");
     const urlButton = document.getElementById("url-button");
 
+    // Ergebnis sicher (ohne innerHTML) als farbige Box darstellen
+    function renderUrlResult(kind, title, text, items, checkedUrl) {
+        urlResult.replaceChildren();
+
+        const box = document.createElement("div");
+        box.className = "result-box " + kind;
+
+        const heading = document.createElement("strong");
+        heading.textContent = title;
+        box.appendChild(heading);
+
+        if (text) {
+            const paragraph = document.createElement("div");
+            paragraph.textContent = text;
+            box.appendChild(paragraph);
+        }
+
+        if (items && items.length > 0) {
+            const list = document.createElement("ul");
+            for (const item of items) {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            }
+            box.appendChild(list);
+        }
+
+        if (checkedUrl) {
+            const urlLine = document.createElement("div");
+            urlLine.className = "checked-url";
+            urlLine.textContent = "Geprüft: " + checkedUrl;
+            box.appendChild(urlLine);
+        }
+
+        urlResult.appendChild(box);
+    }
+
+    // "example.com" -> "https://example.com"
+    function normalizeUrl(value) {
+        const trimmed = value.trim();
+        if (/^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed)) {
+            return trimmed;
+        }
+        return "https://" + trimmed;
+    }
+
+    function errorMessage(data, status) {
+        if (status === 422) {
+            return "Das ist keine gültige URL (nur http/https).";
+        }
+        if (data && typeof data.detail === "string") {
+            return data.detail;
+        }
+        return "URL-Prüfung fehlgeschlagen.";
+    }
+
     urlForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         urlButton.disabled = true;
-        urlResult.textContent = "Analysiere URL ...";
+        urlResult.textContent = "🔄 Analysiere URL ...";
 
         try {
-            const url = document.getElementById("url-input").value;
+            const url = normalizeUrl(
+                document.getElementById("url-input").value
+            );
 
             const response = await fetch("/api/analyze/url", {
                 method: "POST",
@@ -219,25 +308,52 @@
                 body: JSON.stringify({ url })
             });
 
-            const data = await response.json();
+            const data = await response.json().catch(() => null);
 
             if (!response.ok) {
-                throw new Error("URL-Prüfung fehlgeschlagen.");
+                throw new Error(errorMessage(data, response.status));
             }
 
+            const warnings = data.warnings || [];
+
             if (data.status === "threat_detected") {
-                urlResult.textContent =
-                    "⚠️ Bekannte Bedrohung gefunden!";
+                const labels = (data.threat_types || [])
+                    .map((threat) => threat.label);
+
+                renderUrlResult(
+                    "danger",
+                    "⚠️ Bekannte Bedrohung gefunden!",
+                    "Google Safe Browsing stuft diese URL als gefährlich " +
+                    "ein. Öffne sie nicht.",
+                    labels.concat(warnings),
+                    data.url
+                );
             } else if (data.status === "no_known_threat") {
-                urlResult.textContent =
-                    "ℹ️ Keine bekannte Bedrohung gefunden. " +
-                    "Das ist keine Sicherheitsgarantie.";
+                if (warnings.length > 0) {
+                    renderUrlResult(
+                        "warning",
+                        "🟡 Keine bekannte Bedrohung, aber Auffälligkeiten",
+                        "Google kennt keine Bedrohung. Folgende Punkte " +
+                        "solltest du trotzdem prüfen:",
+                        warnings,
+                        data.url
+                    );
+                } else {
+                    renderUrlResult(
+                        "ok",
+                        "✅ Keine bekannte Bedrohung gefunden",
+                        "Das ist keine Sicherheitsgarantie. Prüfe " +
+                        "trotzdem, ob du der Seite vertraust.",
+                        [],
+                        data.url
+                    );
+                }
             } else {
                 throw new Error("Unbekanntes Analyseergebnis.");
             }
 
         } catch (error) {
-            urlResult.textContent = "❌ " + error.message;
+            renderUrlResult("error", "❌ " + error.message, "", [], "");
         } finally {
             urlButton.disabled = false;
         }

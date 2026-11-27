@@ -1,4 +1,5 @@
 
+import ipaddress
 import os
 
 import httpx
@@ -31,6 +32,68 @@ def health():
     return {"status": "ok"}
 
 
+# Lesbare Bezeichnungen für die Google-Bedrohungstypen
+THREAT_LABELS = {
+    "MALWARE": "Schadsoftware (Malware)",
+    "SOCIAL_ENGINEERING": "Phishing / Social Engineering",
+    "UNWANTED_SOFTWARE": "Unerwünschte Software",
+    "POTENTIALLY_HARMFUL_APPLICATION": "Potenziell schädliche App",
+}
+
+# Bekannte URL-Kürzer verschleiern das eigentliche Ziel
+URL_SHORTENERS = {
+    "bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly",
+    "is.gd", "buff.ly", "rebrand.ly", "cutt.ly", "shorturl.at",
+}
+
+
+def local_url_warnings(url: HttpUrl) -> list[str]:
+    """Einfache lokale Heuristiken, die auf verdächtige URLs hinweisen."""
+    warnings = []
+    host = (url.host or "").lower()
+
+    if url.scheme == "http":
+        warnings.append(
+            "Keine verschlüsselte Verbindung (http statt https)."
+        )
+
+    try:
+        ipaddress.ip_address(host.strip("[]"))
+        warnings.append(
+            "Die URL verwendet eine IP-Adresse statt eines Domainnamens."
+        )
+    except ValueError:
+        pass
+
+    if "xn--" in host:
+        warnings.append(
+            "Die Domain enthält Sonderzeichen (Punycode) und könnte "
+            "eine bekannte Domain imitieren."
+        )
+
+    if url.username:
+        warnings.append(
+            "Die URL enthält ein '@' vor der Domain. Damit wird oft "
+            "das echte Ziel verschleiert."
+        )
+
+    if url.port and url.port not in (80, 443):
+        warnings.append(f"Ungewöhnlicher Port: {url.port}.")
+
+    if host in URL_SHORTENERS:
+        warnings.append(
+            "URL-Kürzer erkannt: Das eigentliche Ziel ist nicht sichtbar."
+        )
+
+    if host.count(".") >= 4:
+        warnings.append("Auffällig viele Subdomains.")
+
+    if len(str(url)) > 200:
+        warnings.append("Die URL ist ungewöhnlich lang.")
+
+    return warnings
+
+
 # Unser erster Security-Checker
 
 @app.post("/api/analyze/url")
@@ -54,10 +117,7 @@ async def analyze_url(request: URLRequest):
             "clientVersion": "1.0"
         },
         "threatInfo": {
-            "threatTypes": [
-                "MALWARE",
-                "SOCIAL_ENGINEERING"
-            ],
+            "threatTypes": list(THREAT_LABELS),
             "platformTypes": ["ANY_PLATFORM"],
             "threatEntryTypes": ["URL"],
             "threatEntries": [
@@ -94,6 +154,11 @@ async def analyze_url(request: URLRequest):
 
     matches = data.get("matches", [])
 
+    # Doppelte Bedrohungstypen entfernen, Reihenfolge beibehalten
+    threat_types = list(dict.fromkeys(
+        match.get("threatType", "UNKNOWN") for match in matches
+    ))
+
     return {
         "url": str(request.url),
         "status": (
@@ -102,6 +167,14 @@ async def analyze_url(request: URLRequest):
             else "no_known_threat"
         ),
         "threats": matches,
+        "threat_types": [
+            {
+                "type": threat_type,
+                "label": THREAT_LABELS.get(threat_type, threat_type)
+            }
+            for threat_type in threat_types
+        ],
+        "warnings": local_url_warnings(request.url),
         "message": (
             "Bekannte Bedrohung gefunden."
             if matches
