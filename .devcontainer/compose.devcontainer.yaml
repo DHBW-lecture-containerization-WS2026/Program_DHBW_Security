@@ -1,0 +1,19 @@
+# Ergänzt ../compose.yaml um einen Entwicklungs-Container.
+# Pfade sind relativ zum Projekt-Root (Ordner der ersten Compose-Datei).
+
+services:
+  dev:
+    build:
+      context: .devcontainer
+      dockerfile: Dockerfile
+    command: sleep infinity
+    volumes:
+      - .:/workspaces/security-hub:cached
+    environment:
+      SECURITY_HUB_DATABASE_URL: postgresql://${POSTGRES_USER:-securityhub}:${POSTGRES_PASSWORD:-securityhub}@postgres:5432/securityhub
+      GOOGLE_SAFE_BROWSING_API_KEY: ${GOOGLE_SAFE_BROWSING_API_KEY:-}
+      NVD_API_KEY: ${NVD_API_KEY:-}
+      PYTHONPATH: /workspaces/security-hub
+    depends_on:
+      postgres:
+        condition: service_healthy

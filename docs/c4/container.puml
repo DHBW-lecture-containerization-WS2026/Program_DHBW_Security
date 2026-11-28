@@ -1,0 +1,45 @@
+@startuml container
+!include <C4/C4_Container>
+
+title Security Hub – Container (C4 Level 2)
+
+LAYOUT_TOP_DOWN()
+
+Person(user, "Nutzer", "Prüft Links, Passwörter und E-Mail-Adressen, liest das Lagebild.")
+Person(operator, "Betreiber / Entwickler", "Überwacht die Datensammlung.")
+
+System_Boundary(hub, "Security Hub") {
+    Container(frontend, "Web-Frontend", "HTML, CSS, JavaScript", "Oberfläche mit den Tabs Link prüfen, Passwort erstellen, E-Mail prüfen und Lagebild. Läuft im Browser.")
+    Container(backend, "Backend-API", "Python, FastAPI", "Liefert das Frontend aus, stellt die Checker-Endpunkte (/api/analyze, /api/generate) und die Lagebild-Endpunkte (/api/feeds) bereit.")
+    Container(airflow, "Airflow", "Apache Airflow 3, Python", "DAG 'security_feeds': ruft täglich alle Quellen ab, normalisiert die Daten und löscht Einträge älter als 30 Tage.")
+    ContainerDb(db, "Security-Datenbank", "PostgreSQL 17", "Tabellen sources, security_events und ingestion_runs.")
+    ContainerDb(airflowdb, "Airflow-Metadaten", "PostgreSQL 17", "DAG-Läufe und Task-Status von Airflow.")
+}
+
+System_Ext(gsb, "Google Safe Browsing", "Phishing- und Malware-URLs")
+System_Ext(xon, "XposedOrNot", "E-Mail-Leak-Prüfung")
+System_Ext(hibp, "Have I Been Pwned", "Datenleck-Katalog")
+System_Ext(kev, "CISA KEV", "Aktiv ausgenutzte Lücken")
+System_Ext(nvd, "NIST NVD", "CVE-Datenbank")
+
+Rel(user, frontend, "Nutzt", "HTTPS")
+Rel(frontend, backend, "Ruft API auf", "JSON/HTTPS")
+Rel(operator, airflow, "Überwacht DAG-Läufe", "HTTPS, Airflow-UI")
+
+Rel_R(backend, db, "Liest Lagebild-Daten", "SQL")
+Rel_D(backend, gsb, "Prüft URLs", "JSON/HTTPS")
+Rel_D(backend, xon, "Prüft E-Mail-Adressen", "JSON/HTTPS")
+
+Rel_D(airflow, hibp, "Ruft Datenlecks ab", "JSON/HTTPS")
+Rel_D(airflow, kev, "Ruft ausgenutzte Lücken ab", "JSON/HTTPS")
+Rel_D(airflow, nvd, "Ruft neue CVEs ab", "JSON/HTTPS")
+Rel_L(airflow, db, "Schreibt Einträge, löscht alte Daten", "SQL")
+Rel_R(airflow, airflowdb, "Speichert Status", "SQL")
+
+Lay_R(gsb, xon)
+Lay_R(xon, hibp)
+Lay_R(hibp, kev)
+Lay_R(kev, nvd)
+
+SHOW_LEGEND()
+@enduml

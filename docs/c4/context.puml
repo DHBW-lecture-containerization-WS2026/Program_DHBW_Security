@@ -1,0 +1,29 @@
+@startuml context
+!include <C4/C4_Context>
+
+title Security Hub – Systemkontext (C4 Level 1)
+
+LAYOUT_TOP_DOWN()
+
+Person(user, "Nutzer", "Möchte Links, Passwörter und E-Mail-Adressen prüfen und sich über aktuelle Sicherheitsvorfälle informieren.")
+Person(operator, "Betreiber / Entwickler", "Überwacht die Datensammlung und betreibt die Anwendung.")
+
+System(hub, "Security Hub", "Webanwendung mit Security-Checkern und einem Lagebild über Datenlecks und Sicherheitslücken der letzten 30 Tage.")
+
+System_Ext(gsb, "Google Safe Browsing", "Liste bekannter Phishing- und Malware-URLs.")
+System_Ext(xon, "XposedOrNot", "Prüft, ob eine E-Mail-Adresse in Datenlecks vorkommt.")
+System_Ext(hibp, "Have I Been Pwned", "Katalog öffentlich bekannter Datenlecks.")
+System_Ext(kev, "CISA KEV", "Katalog aktiv ausgenutzter Sicherheitslücken.")
+System_Ext(nvd, "NIST NVD", "Datenbank aller veröffentlichten CVEs.")
+
+Rel(user, hub, "Prüft Links, erstellt Passwörter, prüft E-Mails, liest das Lagebild", "HTTPS")
+Rel(operator, hub, "Überwacht und startet Datenabrufe", "HTTPS")
+
+Rel(hub, gsb, "Prüft URLs", "HTTPS/JSON")
+Rel(hub, xon, "Prüft E-Mail-Adressen (mit Zustimmung)", "HTTPS/JSON")
+Rel(hub, hibp, "Ruft täglich neue Datenlecks ab", "HTTPS/JSON")
+Rel(hub, kev, "Ruft täglich neue ausgenutzte Lücken ab", "HTTPS/JSON")
+Rel(hub, nvd, "Ruft täglich neue CVEs ab", "HTTPS/JSON")
+
+SHOW_LEGEND()
+@enduml

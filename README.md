@@ -20,11 +20,9 @@ Security Hub ist eine Webanwendung, mit der Benutzer verschiedene Sicherheitspr�
 
 ## Architektur
 
-```
-                 täglich                      liest
-Öffentliche APIs ───────► Airflow-DAG ──► PostgreSQL ◄──── FastAPI-Backend ◄──── Browser
-(HIBP, CISA, NVD)        security_feeds   (30 Tage)        + Frontend
-```
+C4-Container-Diagramm (Details und Kontextdiagramm in [docs/architecture.md](docs/architecture.md)):
+
+![C4 Container](docs/c4/container.svg)
 
 | Ordner | Inhalt |
 |---|---|
@@ -53,6 +51,24 @@ Tests ausführen:
 pip install -r requirements.txt
 python -m pytest tests/
 ```
+
+## Entwickeln im Devcontainer
+
+Voraussetzung: Docker Desktop und VS Code mit der Erweiterung *Dev Containers*.
+
+1. Projekt in VS Code öffnen und **„Reopen in Container“** wählen (oder `F1` → *Dev Containers: Reopen in Container*).
+2. Beim ersten Mal werden Pakete installiert, Postgres und Airflow starten automatisch mit.
+3. Im Terminal des Containers:
+
+```bash
+uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000   # Backend mit Auto-Reload
+pytest                                                          # Tests
+python -m pipeline.runner hibp                                  # eine Quelle manuell abrufen
+```
+
+Enthalten: Python 3.12, alle Abhängigkeiten, Docker (nutzt den Docker des Hosts), kubectl, GitHub CLI und eine vorkonfigurierte Datenbankverbindung (SQLTools). Die Konfiguration liegt in `.devcontainer/`.
+
+Läuft parallel schon `docker compose up`, vorher `docker compose down` ausführen, damit sich die Ports nicht überschneiden.
 
 ## Neue Datenquelle hinzufügen
 
